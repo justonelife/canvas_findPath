@@ -113,6 +113,18 @@ function heapSort(input) {
     }
 }
 
+function reconstruct_path(cameFrom, current) {
+    while (current != sss) {
+        let currenti = Math.floor(current / GW);
+        let currentj = current % GW;
+        grid[currenti][currentj] = -1;
+        current = cameFrom[current];
+    }
+    let sssi = Math.floor(sss / GW);
+    let sssj = sss % GW;
+    grid[sssi][sssj] = -1;
+}
+
 function A_Star(start, goal) {
 
 
@@ -132,7 +144,7 @@ function A_Star(start, goal) {
         let current = openSet.shift();
 
 
-        if (current === goal) return true;
+        if (current === goal) return reconstruct_path(cameFrom, current);
 
         let neighborOfCurrent = cities[current].neighbor();
 
@@ -141,7 +153,7 @@ function A_Star(start, goal) {
 
             let neighbor = neighborOfCurrent[i];
 
-            if (cities[neighbor].s !== 1) { // 0: available city, 1: unavailable city
+            if (cities[neighbor].s !== 1) { // others: available city, 1: unavailable city
 
                 let tentative_g = cities[current].g + 1; //1: cost from current to neighbor if neighbor is an available city
                 if (tentative_g < cities[neighbor].g) {
@@ -170,6 +182,7 @@ function draw() {
 
 
             if (grid[i][j] === 1) ctx.fillStyle = 'black';
+            else if (grid[i][j] === -1) ctx.fillStyle = 'red';
             else ctx.fillStyle = 'white';
 
             ctx.fillRect(j * SCALE, i * SCALE, SCALE, SCALE);
@@ -179,6 +192,6 @@ function draw() {
 
 init();
 
-draw();
+A_Star(sss, ggg);
 
-console.log(A_Star(sss, ggg));
+draw();
