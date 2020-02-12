@@ -4,17 +4,17 @@ canvas.height = 500;
 
 let ctx = canvas.getContext("2d");
 
-ctx.beginPath();
-ctx.moveTo(0, 0);
-ctx.lineTo(800, 500);
-ctx.stroke();
 
 const GW = 80; //grid width
 const GH = 50; //grid height
 
+const SCALE = 10; //scale between grid & canvas
+
 const TOTAL_DIRECTION = 4;
 const DI = [-1, 0, 1, 0]; //direction i  UP RIGHT DOWN LEFT
 const DJ = [ 0, 1, 0,-1]; //direction j
+
+const DENSITY = 5;
 
 let grid = null;
 let cities = new Array(GW * GH);
@@ -34,7 +34,7 @@ function init() {
     for (let i = 0; i < GH; i++) {
         for (let j = 0; j < GW; j++) {
 
-            grid[i][j] = Math.floor(Math.random() * 2); //random 0, 1
+            grid[i][j] = Math.floor(Math.random() * DENSITY); //random 0 to DENSITY - 1 
 
             //init cities
             cities[i * GW + j] = new City(i, j, grid[i][j]);
@@ -56,7 +56,7 @@ function City(i, j, status) {
         for (let d = 0; d < TOTAL_DIRECTION; d++) {
             let ni = this.i + DI[d];
             let nj = this.j + DJ[d];
-            if (ni >= 0 && ni <= GH && nj >= 0 && nj <= GW) {
+            if (ni >= 0 && ni < GH && nj >= 0 && nj < GW) {
                 result.push(ni * GW + nj); //id of neighbor city
             }
         }
@@ -131,6 +131,7 @@ function A_Star(start, goal) {
 
         let current = openSet.shift();
 
+
         if (current === goal) return true;
 
         let neighborOfCurrent = cities[current].neighbor();
@@ -140,7 +141,7 @@ function A_Star(start, goal) {
 
             let neighbor = neighborOfCurrent[i];
 
-            if (cities[neighbor].s === 0) { // 0: available city, 1: unavailable city
+            if (cities[neighbor].s !== 1) { // 0: available city, 1: unavailable city
 
                 let tentative_g = cities[current].g + 1; //1: cost from current to neighbor if neighbor is an available city
                 if (tentative_g < cities[neighbor].g) {
@@ -161,4 +162,23 @@ function A_Star(start, goal) {
     return false;
 }
 
+
+function draw() {
+
+    for (let i = 0; i < GH; i++) {
+        for (let j = 0; j < GW; j++) {
+
+
+            if (grid[i][j] === 1) ctx.fillStyle = 'black';
+            else ctx.fillStyle = 'white';
+
+            ctx.fillRect(j * SCALE, i * SCALE, SCALE, SCALE);
+        }
+    }
+}
+
 init();
+
+draw();
+
+console.log(A_Star(sss, ggg));
