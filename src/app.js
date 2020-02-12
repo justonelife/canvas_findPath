@@ -18,6 +18,10 @@ const DJ = [ 0, 1, 0,-1]; //direction j
 
 let grid = null;
 let cities = new Array(GW * GH);
+let inOpenset = new Array(GW * GH);
+
+let sss = 0;
+let ggg = 3999;
 
 function init() {
 
@@ -37,6 +41,9 @@ function init() {
         }
     }
 
+    for (let i = 0; i < GW * GH; i++) {
+        inOpenset[i] = false;
+    }
 
 }
 
@@ -44,7 +51,6 @@ function City(i, j, status) {
     this.i = i;
     this.j = j;
     this.s = status;
-    this.id = this.i * GW + this.j;
     this.neighbor = function() {
         let result = new Array();
         for (let d = 0; d < TOTAL_DIRECTION; d++) {
@@ -56,9 +62,17 @@ function City(i, j, status) {
         }
         return result;
     }
-    this.f = 0;
-    this.g = 0;
-    this.h = 0;
+    this.f = Infinity;
+    this.g = Infinity;
+    this.h = distance(this.id, ggg);
+}
+
+function distance(a, b) {
+    let ai = Math.floor(a / GW);
+    let aj = a % GW;
+    let bi = Math.floor(b / GW);
+    let bj = b % GW;
+    return Math.sqrt((ai - bi) * (ai - bi) + (aj - bj) * (aj -bj));
 }
 
 let array_length = null;
@@ -67,10 +81,10 @@ function heap_root(input, i) {
     let left = 2 * i + 1;
     let right = 2 * i + 2;
     let max = i;
-    if (left < array_length && input[max] < input[left]) {
+    if (left < array_length && cities[input[max]].f < cities[input[left]].f) {
         max = left;
     }
-    if (right < array_length && input[max] < input[right]) {
+    if (right < array_length && cities[input[max]].f < cities[input[right]].f) {
         max = right;
     }
 
@@ -97,6 +111,54 @@ function heapSort(input) {
         array_length--;
         heap_root(input, 0);
     }
+}
+
+function A_Star(start, goal) {
+
+
+    let openSet = new Array(); //the array contains cities need to value, be sorted by f score
+    openSet.push(start);
+    inOpenset[start] = true;
+
+    // For node n, cameFrom[n] is the node immediately preceding it on the cheapest path from start to n currently known
+    let cameFrom = new Array(GW * GH);
+
+    cities[start].g = 0;
+    cities[start].f = cities[start].h;
+
+    while (openSet.length > 0) {
+
+
+        let current = openSet.shift();
+
+        if (current === goal) return true;
+
+        let neighborOfCurrent = cities[current].neighbor();
+
+        for (let i = 0; i < neighborOfCurrent.length; i++) {
+
+
+            let neighbor = neighborOfCurrent[i];
+
+            if (cities[neighbor].s === 0) { // 0: available city, 1: unavailable city
+
+                let tentative_g = cities[current].g + 1; //1: cost from current to neighbor if neighbor is an available city
+                if (tentative_g < cities[neighbor].g) {
+
+                    cameFrom[neighbor] = current;
+                    cities[neighbor].g = tentative_g;
+                    cities[neighbor].f = cities[neighbor].g + cities[neighbor].h;
+
+                    if (!inOpenset[neighbor]) {
+                        openSet.push(neighbor);
+                        inOpenset[neighbor] = true;
+                        heapSort(openSet);
+                    } 
+                }
+            }
+        }
+    }
+    return false;
 }
 
 init();
