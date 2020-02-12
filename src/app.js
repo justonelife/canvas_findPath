@@ -12,7 +12,12 @@ ctx.stroke();
 const GW = 80; //grid width
 const GH = 50; //grid height
 
+const TOTAL_DIRECTION = 4;
+const DI = [-1, 0, 1, 0]; //direction i  UP RIGHT DOWN LEFT
+const DJ = [ 0, 1, 0,-1]; //direction j
+
 let grid = null;
+let cities = new Array(GW * GH);
 
 function init() {
 
@@ -24,9 +29,36 @@ function init() {
 
     for (let i = 0; i < GH; i++) {
         for (let j = 0; j < GW; j++) {
+
             grid[i][j] = Math.floor(Math.random() * 2); //random 0, 1
+
+            //init cities
+            cities[i * GW + j] = new City(i, j, grid[i][j]);
         }
     }
+
+
+}
+
+function City(i, j, status) {
+    this.i = i;
+    this.j = j;
+    this.s = status;
+    this.id = this.i * GW + this.j;
+    this.neighbor = function() {
+        let result = new Array();
+        for (let d = 0; d < TOTAL_DIRECTION; d++) {
+            let ni = this.i + DI[d];
+            let nj = this.j + DJ[d];
+            if (ni >= 0 && ni <= GH && nj >= 0 && nj <= GW) {
+                result.push(ni * GW + nj); //id of neighbor city
+            }
+        }
+        return result;
+    }
+    this.f = 0;
+    this.g = 0;
+    this.h = 0;
 }
 
 let array_length = null;
@@ -67,3 +99,4 @@ function heapSort(input) {
     }
 }
 
+init();
